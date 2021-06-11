@@ -121,18 +121,52 @@ for i in range(participantNum):
         stimuliData[i][k] = {}
 
         propNum = randPropDict[k][i]
-
+        stimuliSizeArray = []
         stimuliData[i][k]["proportionOrder"] = proportions[propNum]
-        # 0 means first, 1 means second
-        stimuliData[i][k]["LargerPlacement"] = random.randint(0, 1)
+
         # POCA, POUA, Length - This is the pixes for length
         # Angle - This is degress
         # Area - pixels for radius
-        # print(sizeOfLarge[k])
-        stimuliData[i][k]["LargerSize"] = random.randint(
-            sizeOfLarge[k][0], sizeOfLarge[k][1])
+        # Third number is whether the larger goes first or second
+        # 0 means first, 1 means second
+        for p in stimuliData[i][k]["proportionOrder"]:
+            largerStimuli = random.randint(
+                sizeOfLarge[k][0], sizeOfLarge[k][1])
+            smallerStimuli = int(largerStimuli*p)
+
+            stimuliSizeArray.append(
+                (largerStimuli, smallerStimuli, random.randint(0, 1)))
+            stimuliData[i][k]["sizes"] = stimuliSizeArray
+            # stimuliData[i][k]["sizes"] = {}
+
+        # Need to know how much to rotate the angle. Between 0 and 360 Degrees
+        if k == "Angle":
+            for d in range(len(stimuliData[i][k]["proportionOrder"])):
+                addItemList = list(stimuliData[i][k]["sizes"][d])
+                addItemList.append(random.randint(0, 360))
+                stimuliData[i][k]["sizes"][d] = tuple(addItemList)
+                # Add fourth element that says rotation
+
+        if k == "Length":
+            startingPoints = []
+            for d in range(len(stimuliData[i][k]["proportionOrder"])):
+                largeStart = 0
+                smallStart = 0
+                largeEnd = 0
+                smallEnd = 0
+                while largeStart == smallStart or smallEnd == largeEnd:
+                    largeSize = stimuliData[i][k]["sizes"][d][0]
+
+                    smallSize = stimuliData[i][k]["sizes"][d][1]
+
+                    largeStart = random.randint(0, 300 - largeSize)
+                    largeEnd = largeStart + largeSize
+
+                    smallStart = random.randint(0, 300 - smallSize)
+                    smallEnd = smallStart + smallEnd
+                    startingPoints.append((largeStart, smallStart))
+                    stimuliData[i][k]["startingPoints"] = startingPoints
 
 
 with open('dataForWebsite.json', 'w') as outfile:
     json.dump(stimuliData,  outfile, indent=4)
-# print(stimuliData)
